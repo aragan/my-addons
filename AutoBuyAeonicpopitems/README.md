@@ -1,4 +1,4 @@
-
+-- Author: Aragan  this addon 
     "[AutoAH] Help:"
     "  //autoah on - Enable the addon."
     "  //autoah off - Disable the addon."
@@ -14,3 +14,4 @@
     "  //autoah buygroup \"Reisenjima\""
     "  //autoah buygroup \"Reisenjima\" helm"  
     "  //autoah help - Show this help message."
+
