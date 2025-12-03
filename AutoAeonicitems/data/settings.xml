@@ -1,0 +1,17 @@
+<?xml version="1.1" ?>
+<settings>
+    <global>
+        <auto_enabled>true</auto_enabled>
+        <delay>8</delay>
+        <delay_max>11</delay_max>
+        <delay_min>6</delay_min>
+        <delay_random>false</delay_random>
+        <item_overrides>
+
+        </item_overrides>
+        <price_increment>10000</price_increment>
+    </global>
+    <aragan>
+        <auto_enabled>false</auto_enabled>
+    </aragan>
+</settings>
