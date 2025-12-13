@@ -1,0 +1,171 @@
+-- --------------------------------------------------
+-- AutoDropItem2 - Auto add dropped items to Treasury drop list
+-- Author: Aragan
+-- --------------------------------------------------
+
+_addon.name     = 'autodropitem2'
+_addon.author   = 'Aragan'
+_addon.version  = '1.0'
+_addon.commands = {'autodropitem2', 'adi2'}
+
+local packets = require('packets')
+local res     = require('resources')
+local config  = require('config')
+require('strings')
+
+----------------------------------------------------------
+-- Settings (from settings.xml)
+--   enabled : Enable/Disable the addon
+--   notify  : Print a chat message when an item drop is detected
+--   bind    : Keyboard bind to toggle the addon (example: ^0 = Ctrl+0)
+----------------------------------------------------------
+local settings = config.load({
+    enabled = true,
+    notify  = true,
+    bind    = '^0',
+})
+
+----------------------------------------------------------
+-- Chat logger (English only)
+----------------------------------------------------------
+local function log(msg)
+    windower.add_to_chat(207, '[AutoDropItem2] ' .. msg)
+end
+
+----------------------------------------------------------
+-- Keyboard bind handling
+----------------------------------------------------------
+local function apply_bind()
+    if settings.bind and settings.bind ~= '' then
+        windower.send_command('bind ' .. settings.bind .. ' input //autodropitem2 toggle')
+    end
+end
+
+local function remove_bind()
+    if settings.bind and settings.bind ~= '' then
+        windower.send_command('unbind ' .. settings.bind)
+    end
+end
+
+----------------------------------------------------------
+-- Addon Commands
+-- //autodropitem2 <status|on|off|toggle|bind ^0|save|reload>
+----------------------------------------------------------
+windower.register_event('addon command', function(cmd, ...)
+    cmd = (cmd or 'status'):lower()
+    local argstr = table.concat({...}, ' ')
+
+    if cmd == 'status' or cmd == '' then
+        log('Status: ' .. (settings.enabled and 'ON' or 'OFF'))
+        log('Bind: ' .. tostring(settings.bind))
+        return
+    end
+
+    if cmd == 'on' then
+        settings.enabled = true
+        config.save(settings)
+        log('Enabled.')
+        return
+    end
+
+    if cmd == 'off' then
+        settings.enabled = false
+        config.save(settings)
+        log('Disabled.')
+        return
+    end
+
+    if cmd == 'toggle' then
+        settings.enabled = not settings.enabled
+        config.save(settings)
+        log('Toggled: ' .. (settings.enabled and 'ON' or 'OFF'))
+        return
+    end
+
+    if cmd == 'bind' then
+        local newbind = (argstr or ''):gsub('^%s+', ''):gsub('%s+$', '')
+        if newbind == '' then
+            log('Usage: //autodropitem2 bind ^0')
+            return
+        end
+        remove_bind()
+        settings.bind = newbind
+        config.save(settings)
+        apply_bind()
+        log('Bind changed to: ' .. settings.bind)
+        return
+    end
+
+    if cmd == 'save' then
+        config.save(settings)
+        log('Settings saved.')
+        return
+    end
+
+    if cmd == 'reload' then
+        settings = config.load(settings)
+        remove_bind()
+        apply_bind()
+        log('Settings reloaded.')
+        return
+    end
+
+    log('Unknown command. Available: status|on|off|toggle|bind|save|reload')
+end)
+
+----------------------------------------------------------
+-- Incoming packet hook
+-- Detecting item drop from message ID 180 (packet 0x009)
+----------------------------------------------------------
+windower.register_event('incoming chunk', function(id, data, modified, injected, blocked)
+    if not settings.enabled then return end
+    if injected then return end
+    if id ~= 0x009 then return end
+
+    local p = packets.parse('incoming', data)
+    if not p then return end
+
+    local msg = p.Message or p['Message']
+    if msg ~= 180 then return end  -- Item dropped message
+
+    local item_id, qty
+
+    -- Try reading Param fields
+    item_id = p['Param 1'] or p.Param1 or p['Param1']
+    qty     = p['Param 2'] or p.Param2 or p['Param2'] or 1
+
+    -- Fallback: read from raw data split (matching your original code logic)
+    if not item_id then
+        local parts = tostring(p.data or ''):split(' ')
+        if parts and #parts >= 4 then
+            item_id = tonumber(parts[2])
+            qty     = tonumber(parts[4]) or 1
+        end
+    end
+
+    item_id = tonumber(item_id)
+    qty     = tonumber(qty) or 1
+    if not item_id then return end
+
+    local item = res.items[item_id]
+    if not item or not item.en then return end
+
+    if settings.notify then
+        log(('Detected dropped item: "%s" x%d'):format(item.en, qty))
+    end
+
+    -- Add to Treasury drop filter
+    windower.send_command(('treasury drop add "%s"'):format(item.en))
+end)
+
+----------------------------------------------------------
+-- Load / Unload Handlers
+----------------------------------------------------------
+windower.register_event('load', function()
+    apply_bind()
+    log('Loaded. Status: ' .. (settings.enabled and 'ON' or 'OFF'))
+end)
+
+windower.register_event('unload', function()
+    remove_bind()
+end)
