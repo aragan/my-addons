@@ -1,0 +1,62 @@
+<?xml version="1.1" ?>
+<settings>
+    <global>
+        <bg>
+            <alpha>140</alpha>
+            <blue>20</blue>
+            <green>20</green>
+            <red>20</red>
+            <visible>true</visible>
+        </bg>
+        <display_mode>full</display_mode>
+        <flags>
+            <bold>false</bold>
+            <bottom>false</bottom>
+            <draggable>false</draggable>
+            <italic>false</italic>
+            <right>false</right>
+        </flags>
+        <hud_anywhere>false</hud_anywhere>
+        <padding>0</padding>
+        <pos>
+            <x>1320</x>
+            <y>180</y>
+        </pos>
+        <text>
+            <alpha>255</alpha>
+            <blue>255</blue>
+            <font>Consolas</font>
+            <fonts>
+
+            </fonts>
+            <green>255</green>
+            <red>255</red>
+            <size>11</size>
+            <stroke>
+                <alpha>200</alpha>
+                <blue>0</blue>
+                <green>0</green>
+                <red>0</red>
+                <width>2</width>
+            </stroke>
+        </text>
+        <text_color_mode>gold</text_color_mode>
+        <visible>true</visible>
+    </global>
+    <aragan>
+        <display_mode>short</display_mode>
+        <flags>
+            <draggable>true</draggable>
+        </flags>
+        <hud_anywhere>true</hud_anywhere>
+        <pos>
+            <x>766</x>
+            <y>246</y>
+        </pos>
+        <text>
+            <fonts>
+
+            </fonts>
+        </text>
+    </aragan>
+</settings>
